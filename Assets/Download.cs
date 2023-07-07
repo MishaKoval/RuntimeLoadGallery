@@ -27,6 +27,7 @@ public class Download : MonoBehaviour
 
     private async void Start()
     {
+        Application.targetFrameRate = 120;
         for (int i = 0; i < 66; i++)
         {
             imageUrls.Add(url + (i + 1)+ ".jpg");
@@ -41,23 +42,43 @@ public class Download : MonoBehaviour
         {
             startImages[i].sprite = startTextures[i].ConvertToSprite();
         }
-        
-        /*List<UniTask<Texture2D>> tasks = new List<UniTask<Texture2D>>();
-        for (int i = 0; i < 66; i++)
-        {
-            var task = DownloadImageAsync(imageUrls[i]);
-            tasks.Add(task);
-        }
 
-        for (int i = 0; i < 66; i++)
+        for (int i = 8; i < 66; i++)
         {
-            Texture2D a = await tasks[i];
-            if (a != null)
+            var index = i;
+            _images[index].GetComponent<CheckVisibility>().OnBecameVisible +=() =>
             {
-                _images[i].sprite = a.ConvertToSprite();
+                if (_images[index].sprite == null)
+                {
+                    DownloadImageWithIndex(index);
+                }
+            };
+        }
+        
+        
+
+            /*List<UniTask<Texture2D>> tasks = new List<UniTask<Texture2D>>();
+            for (int i = 0; i < 66; i++)
+            {
+                var task = DownloadImageAsync(imageUrls[i]);
+                tasks.Add(task);
             }
-        }*/
+    
+            for (int i = 0; i < 66; i++)
+            {
+                Texture2D a = await tasks[i];
+                if (a != null)
+                {
+                    _images[i].sprite = a.ConvertToSprite();
+                }
+            }*/
     }
+
+    private async void DownloadImageWithIndex(int index)
+    {
+        _images[index].sprite = (await DownloadImageAsync(imageUrls[index])).ConvertToSprite();
+    }
+    
 
     private async UniTask<Texture2D> DownloadImageAsync(string imageUrl)
     {
@@ -70,7 +91,7 @@ public class Download : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log(e.Message);
+            //Debug.Log(e.Message);
             return null;
         }
        

@@ -5,7 +5,6 @@ using UnityEngine;
 public class CheckVisibility : MonoBehaviour
 {
     private bool _isVisible;
-
     public event Action OnBecameVisible;
     
     [SerializeField] private RectTransform canvasRect;
@@ -22,7 +21,10 @@ public class CheckVisibility : MonoBehaviour
                 OnBecameVisible?.Invoke();
             }
         }
-        _isVisible = false;
+        else
+        {
+            _isVisible = false;
+        }
     }
 
     private void Update()
