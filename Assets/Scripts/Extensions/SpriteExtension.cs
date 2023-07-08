@@ -44,7 +44,6 @@ namespace Extensions
                 RenderTexture.ReleaseTemporary( rt );
             }
             Object.Destroy(sourceTex);
-
             return result;
         }
     }
