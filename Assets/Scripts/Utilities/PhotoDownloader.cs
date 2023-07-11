@@ -42,13 +42,20 @@ namespace Utilities
                 _imageUrls.Add(URL + (i + 1) + ".jpg");
             }
 
+            
+            AndroidToastMessage.ShowAndroidToastMessage("Загрузка началась!");
+            for (int i = 0; i < startImages.Count; i++)
+            {
+                startImages[i].sprite = loadingSprite;
+            }
+
             var startUrls = _imageUrls.GetRange(0, startImages.Count);
 
             var startTextures = await UniTask.WhenAll(startUrls.Select(DownloadImageAsync));
 
             for (int i = 0; i < startTextures.Length; i++)
             {
-                startImages[i].sprite = startTextures[i].ConvertToSprite();
+                startImages[i].sprite =SpriteExtension.Scale( startTextures[i],100,100).ConvertToSprite();
             }
             
             for (int i = 0; i < checkImageVisibility.Count; i++)
