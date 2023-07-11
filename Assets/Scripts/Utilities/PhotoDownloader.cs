@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Extensions;
 using UnityEngine;
@@ -11,16 +12,12 @@ namespace Utilities
 {
     public class PhotoDownloader : MonoBehaviour
     {
-        private const string URL = "http://data.ikppbb.com/test-task-unity-data/pics/";
-
         [SerializeField] private List<Image> startImages;
-
         [SerializeField] private List<CheckImageVisibility> checkImageVisibility = new List<CheckImageVisibility>();
-
         [SerializeField] private Sprite loadingSprite;
         
+        private const string URL = "http://data.ikppbb.com/test-task-unity-data/pics/";
         private readonly List<string> _imageUrls = new List<string>();
-
         private readonly List<Action> _actions = new List<Action>();
 
         private void OnEnable()
@@ -41,9 +38,8 @@ namespace Utilities
             {
                 _imageUrls.Add(URL + (i + 1) + ".jpg");
             }
-
             
-            AndroidToastMessage.ShowAndroidToastMessage("Загрузка началась!");
+            AndroidToastMessage.ShowAndroidToastMessage("Download started!");
             for (int i = 0; i < startImages.Count; i++)
             {
                 startImages[i].sprite = loadingSprite;
@@ -51,11 +47,18 @@ namespace Utilities
 
             var startUrls = _imageUrls.GetRange(0, startImages.Count);
 
-            var startTextures = await UniTask.WhenAll(startUrls.Select(DownloadImageAsync));
+            List<UniTask<Texture2D>> startImagesLoadTasks = new List<UniTask<Texture2D>>();
+
+            for (int i = 0; i < startUrls.Count; i++)
+            {
+                startImagesLoadTasks.Add(DownloadImageAsync(startUrls[i],this.GetCancellationTokenOnDestroy()));
+            }
+
+            var startTextures = await UniTask.WhenAll(startImagesLoadTasks);
 
             for (int i = 0; i < startTextures.Length; i++)
             {
-                startImages[i].sprite =SpriteExtension.Scale(startTextures[i],100,100).ConvertToSprite();
+                startImages[i].sprite = SpriteExtension.Scale(startTextures[i],100,100).ConvertToSprite();
             }
             
             for (int i = 0; i < checkImageVisibility.Count; i++)
@@ -78,32 +81,39 @@ namespace Utilities
             {
                 checkImageVisibility[index].GetImage().sprite = loadingSprite;
                 //todo add settings for compress
-                checkImageVisibility[index].GetImage().sprite = SpriteExtension.Scale(await DownloadImageAsync(_imageUrls[index + 8]),100,100).ConvertToSprite();
+                try
+                {
+                    Texture2D texture2D =
+                        await DownloadImageAsync(_imageUrls[index + 8], this.GetCancellationTokenOnDestroy());
+                    if (texture2D != null)
+                    {
+                        checkImageVisibility[index].GetImage().sprite = texture2D.ConvertToSprite();
+                        //checkImageVisibility[index].GetImage().sprite = SpriteExtension.Scale(texture2D,100,100).ConvertToSprite();
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
             }
         }
 
 
-        private async UniTask<Texture2D> DownloadImageAsync(string imageUrl)
+        private async UniTask<Texture2D> DownloadImageAsync(string imageUrl,CancellationToken cancellationToken)
         {
-            var cert = new Certificate();
             using var request = UnityWebRequestTexture.GetTexture(imageUrl);
-            request.certificateHandler = cert;
             try
             {
-                await request.SendWebRequest();
+                await request.SendWebRequest().WithCancellation(cancellationToken);
             }
             catch (Exception)
             {
                 return null;
             }
-
-            cert.Dispose();
-
             if (request.result == UnityWebRequest.Result.Success)
             {
                 return DownloadHandlerTexture.GetContent(request);
             }
-            
             return null;
         }
 
