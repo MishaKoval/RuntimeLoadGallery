@@ -70,6 +70,7 @@ namespace Utilities
             if (checkImageVisibility[index].GetImage().sprite == null)
             {
                 checkImageVisibility[index].GetImage().sprite = loadingSprite;
+                //todo add settings for compress
                 checkImageVisibility[index].GetImage().sprite = SpriteExtension.Scale(await DownloadImageAsync(_imageUrls[index + 8]),100,100).ConvertToSprite();
             }
         }
