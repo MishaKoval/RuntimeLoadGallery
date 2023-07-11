@@ -55,7 +55,7 @@ namespace Utilities
 
             for (int i = 0; i < startTextures.Length; i++)
             {
-                startImages[i].sprite =SpriteExtension.Scale( startTextures[i],100,100).ConvertToSprite();
+                startImages[i].sprite =SpriteExtension.Scale(startTextures[i],100,100).ConvertToSprite();
             }
             
             for (int i = 0; i < checkImageVisibility.Count; i++)
