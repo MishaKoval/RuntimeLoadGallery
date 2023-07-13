@@ -11,7 +11,12 @@ namespace Utilities
         [SerializeField] private RectTransform viewPortRect;
         [SerializeField] private RectTransform rectToCheck;
         private bool _isVisible;
-        
+
+        public void SetViewPortRect(RectTransform viewPortRect)
+        {
+            this.viewPortRect = viewPortRect;
+        }
+
         private void CheckVisible()
         {
             if(RectTransformUtility.RectangleContainsScreenPoint(viewPortRect, rectToCheck.position))

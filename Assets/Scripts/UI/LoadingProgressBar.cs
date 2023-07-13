@@ -11,6 +11,7 @@ namespace UI
 {
     public class LoadingProgressBar : MonoBehaviour
     {
+        public static LoadingProgressBar Instance;
         [SerializeField] private GameObject canvas;
         [SerializeField] private Slider slider;
         [SerializeField] private TMP_Text percentText;
@@ -19,17 +20,13 @@ namespace UI
 
         private void Awake()
         {
+            Instance = this;
             DontDestroyOnLoad(this);
         }
 
         private void OnDestroy()
         {
-            if (volumeProfile.TryGet(out Vignette vignette))
-            {
-                vignette.intensity.value = 0.0f;
-                vignette.smoothness.value = 0.0f;
-            }
-            volume.priority = -1;
+            DisableProgressBar();
         }
 
 #if UNITY_EDITOR
@@ -76,10 +73,17 @@ namespace UI
                 vignette.smoothness.value -= 0.01f;
                 percentText.text = (int)(slider.value * 100) + "%";
             }
-            vignette.intensity.value = 0.0f;
-            vignette.smoothness.value = 0.0f;
+        }
+
+        public void DisableProgressBar()
+        {
+            if (volumeProfile.TryGet(out Vignette vignette))
+            {
+                vignette.intensity.value = 0.0f;
+                vignette.smoothness.value = 0.0f;
+            }
             volume.priority = -1;
-            canvas.SetActive(false);
+            canvas.SetActive(false);   
         }
     }
 }

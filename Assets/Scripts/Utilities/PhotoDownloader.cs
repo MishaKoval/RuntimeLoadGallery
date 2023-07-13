@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UI;
@@ -11,24 +11,18 @@ namespace Utilities
 {
     public class PhotoDownloader : MonoBehaviour
     {
-        [SerializeField] private List<RectVisibility> imagesVisibility = new();
-        [SerializeField] private List<GalleryElement> galleryElements;
         [SerializeField] private Texture loadingSprite;
+        [SerializeField] private GameObject galleryElementPrefab;
+        [SerializeField] private Transform contentTransform;
         
+        [SerializeField] private RectTransform viewPortRect;
+
         private const string URL = "http://data.ikppbb.com/test-task-unity-data/pics/";
+        
+        private readonly List<RectVisibility> _rectVisibilities = new();
+        private readonly List<GalleryElement> _galleryElements = new();
         private readonly List<string> _imageUrls = new();
         private readonly List<Action> _actions = new();
-
-        private void OnEnable()
-        {
-            for (int i = 0; i < imagesVisibility.Count; i++)
-            {
-                var index = i;
-                var lambda =  new Action(() => DownloadImageWithIndex(index));
-                _actions.Add(lambda);
-                imagesVisibility[index].OnBecameVisible += lambda;
-            }
-        }
 
         private void Start()
         {
@@ -37,30 +31,61 @@ namespace Utilities
             {
                 _imageUrls.Add(URL + (i + 1) + ".jpg");
             }
+
+            for (int i = 0; i < 66; i++)
+            {
+                var index = i;
+                var lambda =  new Action(() => DownloadImageWithIndex(index));
+                _actions.Add(lambda);
+                var galleryPrefab = Instantiate(galleryElementPrefab, contentTransform);
+                var rectVisibility = galleryPrefab.GetComponent<RectVisibility>();
+                rectVisibility.SetViewPortRect(viewPortRect);
+                _rectVisibilities.Add(rectVisibility);
+                var galleryElement = galleryPrefab.GetComponent<GalleryElement>();
+                _galleryElements.Add(galleryElement);
+                rectVisibility.OnBecameVisible += lambda;
+            }
             
             AndroidToastMessage.ShowAndroidToastMessage("Download started!");
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
-            for (int i = 0; i < imagesVisibility.Count; i++)
+            for (int i = 0; i < _rectVisibilities.Count; i++)
             {
-                imagesVisibility[i].OnBecameVisible -= _actions[i];
+                _rectVisibilities[i].OnBecameVisible -= _actions[i];
             }
         }
 
         private async void DownloadImageWithIndex(int index)
         {
-            if (galleryElements[index].GetImage().texture == null)
+            if (_galleryElements[index].GetImage().texture == null)
             {
-                galleryElements[index].GetImage().texture = loadingSprite;
+                _galleryElements[index].GetImage().texture = loadingSprite;
                 try
                 {
-                    Texture2D texture2D =
-                        await DownloadImageAsync(_imageUrls[index], this.GetCancellationTokenOnDestroy());
+                    
+                    Texture2D texture2D;
+                    if (File.Exists(Path.Combine(Application.persistentDataPath,index + ".jpg")))
+                    {
+                        texture2D = await DownloadImageAsync(Path.Combine("file://" + Application.persistentDataPath,index + ".jpg"), this.GetCancellationTokenOnDestroy());
+                    }
+                    else
+                    {
+                        texture2D = 
+                            await DownloadImageAsync(_imageUrls[index], this.GetCancellationTokenOnDestroy());
+                        byte[] bytes = texture2D.EncodeToJPG();
+                        var savePath = Path.Combine(Application.persistentDataPath,index + ".jpg");
+                        if (!Directory.Exists(Application.persistentDataPath))
+                        {
+                            Directory.CreateDirectory(Application.persistentDataPath);
+                        }
+                        await File.WriteAllBytesAsync(savePath, bytes);
+                    }
+                    
                     if (texture2D != null)
                     {
-                        galleryElements[index].GetImage().texture = texture2D;
+                        _galleryElements[index].GetImage().texture = texture2D;
                     }
                 }
                 catch (Exception ex)
@@ -69,8 +94,7 @@ namespace Utilities
                 }
             }
         }
-
-
+        
         private async UniTask<Texture2D> DownloadImageAsync(string imageUrl,CancellationToken cancellationToken)
         {
             using var request = UnityWebRequestTexture.GetTexture(imageUrl);
@@ -87,13 +111,6 @@ namespace Utilities
                 return DownloadHandlerTexture.GetContent(request);
             }
             return null;
-        }
-
-        private void OnValidate()
-        {
-            Transform content = GameObject.Find("Content").transform;
-            imagesVisibility = content.GetComponentsInChildren<RectVisibility>().ToList();
-            galleryElements = content.GetComponentsInChildren<GalleryElement>().ToList();
         }
     }
 }

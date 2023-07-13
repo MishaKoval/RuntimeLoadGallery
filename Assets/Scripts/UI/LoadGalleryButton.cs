@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Utilities;
@@ -21,7 +23,15 @@ namespace UI
 
         private async void LoadGallery()
         {
-            await SceneLoader.LoadScene(1,LoadSceneMode.Single);
+            try
+            {
+                await LoadingProgressBar.Instance.ShowProgressBar(2.0f,this.GetCancellationTokenOnDestroy());
+                await SceneLoader.LoadScene(1,LoadSceneMode.Single).ContinueWith(LoadingProgressBar.Instance.DisableProgressBar);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
         }
 
         private void OnDestroy()

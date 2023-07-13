@@ -1,5 +1,4 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -11,8 +10,6 @@ namespace UI
     [RequireComponent(typeof(RawImage))]
     public class GalleryElement : MonoBehaviour,IPointerClickHandler
     {
-        public static event Action<Texture> OnLoadSingleView;
-        
         private RawImage image;
         
         public RawImage GetImage()
@@ -20,23 +17,21 @@ namespace UI
             return image;
         }
         
-        private void Awake()
-        {
-            image = GetComponent<RawImage>();
-        }
-        
         public void OnPointerClick(PointerEventData eventData)
         {
             LoadSingleView();
         }
         
+        private void Awake()
+        {
+            image = GetComponent<RawImage>();
+        }
+        
         private async void LoadSingleView()
         {
-            await SceneLoader.LoadScene(2,  LoadSceneMode.Single).ContinueWith(()=>
-            {
-                SelectedImageData.selectedSprite = image.texture;
-                OnLoadSingleView?.Invoke(image.texture);
-            });
+            SelectedPhotoData.selectedTexture = image.texture;
+            await LoadingProgressBar.Instance.ShowProgressBar(0.5f);
+            await SceneLoader.LoadScene(2,  LoadSceneMode.Single).ContinueWith(LoadingProgressBar.Instance.DisableProgressBar);
         }
     }
 }
