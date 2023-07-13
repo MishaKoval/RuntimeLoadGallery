@@ -25,8 +25,8 @@ namespace UI
         {
             try
             {
-                await LoadingProgressBar.Instance.ShowProgressBar(2.0f,this.GetCancellationTokenOnDestroy());
-                await SceneLoader.LoadScene(1,LoadSceneMode.Single).ContinueWith(LoadingProgressBar.Instance.DisableProgressBar);
+                await LoadingProgressBar.instance.ShowProgressBar(2.0f,this.GetCancellationTokenOnDestroy());
+                await SceneLoader.LoadScene(1,LoadSceneMode.Single).ContinueWith(LoadingProgressBar.instance.DisableProgressBar);
             }
             catch (Exception e)
             {

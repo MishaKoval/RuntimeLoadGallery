@@ -30,8 +30,8 @@ namespace UI
         private async void LoadSingleView()
         {
             SelectedPhotoData.selectedTexture = image.texture;
-            await LoadingProgressBar.Instance.ShowProgressBar(0.5f);
-            await SceneLoader.LoadScene(2,  LoadSceneMode.Single).ContinueWith(LoadingProgressBar.Instance.DisableProgressBar);
+            await LoadingProgressBar.instance.ShowProgressBar(0.5f);
+            await SceneLoader.LoadScene(2,  LoadSceneMode.Single).ContinueWith(LoadingProgressBar.instance.DisableProgressBar);
         }
     }
 }

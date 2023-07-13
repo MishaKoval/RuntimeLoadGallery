@@ -11,7 +11,7 @@ namespace UI
 {
     public class LoadingProgressBar : MonoBehaviour
     {
-        public static LoadingProgressBar Instance;
+        public static LoadingProgressBar instance;
         [SerializeField] private GameObject canvas;
         [SerializeField] private Slider slider;
         [SerializeField] private TMP_Text percentText;
@@ -20,7 +20,7 @@ namespace UI
 
         private void Awake()
         {
-            Instance = this;
+            instance = this;
             DontDestroyOnLoad(this);
         }
 
