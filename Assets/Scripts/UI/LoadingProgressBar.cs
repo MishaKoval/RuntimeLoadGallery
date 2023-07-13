@@ -66,6 +66,7 @@ namespace UI
                 await UniTask.Delay(TimeSpan.FromSeconds(step), cancellationToken: cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
+                    DisableProgressBar();
                     return;
                 }
                 slider.value += 0.01f;
