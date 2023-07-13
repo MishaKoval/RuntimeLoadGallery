@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using Utilities;
 
 namespace UI
 {
@@ -11,7 +10,7 @@ namespace UI
         private void Awake()
         {
             image = GetComponent<RawImage>();
-            ImageVisibility.OnLoadSingleView += SetImage;
+            GalleryElement.OnLoadSingleView += SetImage;
         }
 
         private void SetImage(Texture texture)
@@ -21,7 +20,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            ImageVisibility.OnLoadSingleView -= SetImage;
+            GalleryElement.OnLoadSingleView -= SetImage;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            if (volumeProfile.TryGet(out Vignette vignette));
+            if (volumeProfile.TryGet(out Vignette vignette))
             {
                 vignette.intensity.value = 0.0f;
                 vignette.smoothness.value = 0.0f;
@@ -57,7 +57,7 @@ namespace UI
         {
             canvas.SetActive(true);
             volume.priority = 1f;
-            if (volumeProfile.TryGet(out Vignette vignette));
+            if (volumeProfile.TryGet(out Vignette vignette))
             {
                 vignette.intensity.value = 1.0f;
                 vignette.smoothness.value = 1.0f;
