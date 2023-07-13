@@ -1,4 +1,6 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
+using UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -7,26 +9,26 @@ using UnityEngine.UI;
 namespace Utilities
 {
     [RequireComponent(typeof(RectTransform))]
-    [RequireComponent(typeof(Image))]
-    public class CheckImageVisibility : MonoBehaviour, IPointerClickHandler
+    [RequireComponent(typeof(RawImage))]
+    public class ImageVisibility : MonoBehaviour, IPointerClickHandler
     {
-        public static event Action<Sprite> OnLoadSingleView;
+        public static event Action<Texture> OnLoadSingleView;
         
         public event Action OnBecameVisible;
         
         [SerializeField] private RectTransform canvasRect;
         [SerializeField] private RectTransform rectToCheck;
-        private Image _image;
+        private RawImage _image;
         private bool _isVisible;
         
-        public Image GetImage()
+        public RawImage GetImage()
         {
             return _image;
         }
         
         private void Awake()
         {
-            _image = GetComponent<Image>();
+            _image = GetComponent<RawImage>();
         }
         
         private void CheckVisible()
@@ -57,9 +59,10 @@ namespace Utilities
         
         private async void LoadSingleView()
         {
-            await SceneLoader.LoadScene(2,  LoadSceneMode.Single,()=>
+            await SceneLoader.LoadScene(2,  LoadSceneMode.Single).ContinueWith(()=>
             {
-                OnLoadSingleView?.Invoke(_image.sprite);
+                SelectedImageData.selectedSprite = _image.texture;
+                OnLoadSingleView?.Invoke(_image.texture);
             });
         }
     }

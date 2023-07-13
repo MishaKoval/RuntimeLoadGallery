@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Extensions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -12,9 +11,9 @@ namespace Utilities
 {
     public class PhotoDownloader : MonoBehaviour
     {
-        [SerializeField] private List<Image> startImages;
-        [SerializeField] private List<CheckImageVisibility> checkImageVisibility = new List<CheckImageVisibility>();
-        [SerializeField] private Sprite loadingSprite;
+        [SerializeField] private List<RawImage> startImages;
+        [SerializeField] private List<ImageVisibility> checkImageVisibility = new List<ImageVisibility>();
+        [SerializeField] private Texture loadingSprite;
         
         private const string URL = "http://data.ikppbb.com/test-task-unity-data/pics/";
         private readonly List<string> _imageUrls = new List<string>();
@@ -42,7 +41,7 @@ namespace Utilities
             AndroidToastMessage.ShowAndroidToastMessage("Download started!");
             for (int i = 0; i < startImages.Count; i++)
             {
-                startImages[i].sprite = loadingSprite;
+                startImages[i].texture = loadingSprite;
             }
 
             var startUrls = _imageUrls.GetRange(0, startImages.Count);
@@ -58,7 +57,7 @@ namespace Utilities
 
             for (int i = 0; i < startTextures.Length; i++)
             {
-                startImages[i].sprite = SpriteExtension.Scale(startTextures[i],100,100).ConvertToSprite();
+                startImages[i].texture =startTextures[i];
             }
             
             for (int i = 0; i < checkImageVisibility.Count; i++)
@@ -77,9 +76,9 @@ namespace Utilities
 
         private async void DownloadImageWithIndex(int index)
         {
-            if (checkImageVisibility[index].GetImage().sprite == null)
+            if (checkImageVisibility[index].GetImage().texture == null)
             {
-                checkImageVisibility[index].GetImage().sprite = loadingSprite;
+                checkImageVisibility[index].GetImage().texture = loadingSprite;
                 //todo add settings for compress
                 try
                 {
@@ -87,13 +86,13 @@ namespace Utilities
                         await DownloadImageAsync(_imageUrls[index + 8], this.GetCancellationTokenOnDestroy());
                     if (texture2D != null)
                     {
-                        checkImageVisibility[index].GetImage().sprite = texture2D.ConvertToSprite();
+                        checkImageVisibility[index].GetImage().texture = texture2D;
                         //checkImageVisibility[index].GetImage().sprite = SpriteExtension.Scale(texture2D,100,100).ConvertToSprite();
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignored
+                    Debug.Log(ex.Message);
                 }
             }
         }
@@ -120,7 +119,7 @@ namespace Utilities
         private void OnValidate()
         {
             Transform content = GameObject.Find("Content").transform;
-            checkImageVisibility = content.GetComponentsInChildren<CheckImageVisibility>().ToList();
+            checkImageVisibility = content.GetComponentsInChildren<ImageVisibility>().ToList();
         }
     }
 }

@@ -6,22 +6,22 @@ namespace UI
 {
     public class SingleViewSpriteSetter : MonoBehaviour
     {
-        private Image image;
+        private RawImage image;
         
         private void Awake()
         {
-            image = GetComponent<Image>();
-            CheckImageVisibility.OnLoadSingleView += SetImage;
+            image = GetComponent<RawImage>();
+            ImageVisibility.OnLoadSingleView += SetImage;
         }
 
-        private void SetImage(Sprite sprite)
+        private void SetImage(Texture texture)
         {
-            image.sprite = sprite;
+            image.texture = texture;
         }
 
         private void OnDestroy()
         {
-            CheckImageVisibility.OnLoadSingleView -= SetImage;
+            ImageVisibility.OnLoadSingleView -= SetImage;
         }
     }
 }

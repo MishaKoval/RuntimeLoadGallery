@@ -36,24 +36,24 @@ namespace UI
         [ContextMenu("TEST5")]
         private async void Test5Sec()
         {
-            await ShowProgressBar(5.0f,null);
+            await ShowProgressBar(5.0f);
         }
         
         [ContextMenu("TEST1")]
         private async void Test1Sec()
         {
-            await ShowProgressBar(1.0f,null);
+            await ShowProgressBar(1.0f);
         }
         
         [ContextMenu("TEST20")]
         private async void Test20Sec()
         {
-            await ShowProgressBar(20f,null);
+            await ShowProgressBar(20f);
         }
 #endif
 
 
-        public async UniTask ShowProgressBar(float waitTime,Action callback,CancellationToken cancellationToken = default)
+        public async UniTask ShowProgressBar(float waitTime,CancellationToken cancellationToken = default)
         {
             canvas.SetActive(true);
             volume.priority = 1f;
@@ -67,6 +67,10 @@ namespace UI
             while (slider.value < 1.0f)
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(step), cancellationToken: cancellationToken);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
                 slider.value += 0.01f;
                 vignette.intensity.value -= 0.01f;
                 vignette.smoothness.value -= 0.01f;
@@ -76,7 +80,6 @@ namespace UI
             vignette.smoothness.value = 0.0f;
             volume.priority = -1;
             canvas.SetActive(false);
-            callback?.Invoke();
         }
     }
 }
