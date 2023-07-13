@@ -7,11 +7,6 @@ namespace UI
     public class BackButton : MonoBehaviour
     {
         private bool isEnabled = true;
-        
-        private void Awake()
-        {
-            DontDestroyOnLoad(this);
-        }
 
         private async void Update()
         {

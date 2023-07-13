@@ -46,7 +46,7 @@ namespace Utilities
                 rectVisibility.OnBecameVisible += lambda;
             }
             
-            AndroidToastMessage.ShowAndroidToastMessage("Download started!");
+            AndroidToastMessage.ShowAndroidToastMessage("Downloading...");
         }
 
         private void OnDestroy()

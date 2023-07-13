@@ -20,8 +20,15 @@ namespace UI
 
         private void Awake()
         {
-            instance = this;
-            DontDestroyOnLoad(this);
+            if (instance == null)
+            {
+                instance = this;
+                DontDestroyOnLoad(this);
+            }
+            else
+            {
+                Destroy(this);
+            }
         }
 
         private void OnDestroy()
@@ -63,7 +70,7 @@ namespace UI
             slider.value = 0;
             while (slider.value < 1.0f)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(step), cancellationToken: cancellationToken);
+                await UniTask.Delay(TimeSpan.FromSeconds(step), DelayType.DeltaTime, cancellationToken: cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     DisableProgressBar();
